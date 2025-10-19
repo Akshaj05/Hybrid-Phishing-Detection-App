@@ -1,30 +1,58 @@
 import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 import pandas as pd
-from app.services.feature_extraction import extract_features
+import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_auc_score
-import joblib, os
 
-# Path to labeled CSV: columns 'url','label' (1 phishing, 0 benign)
-df = pd.read_csv("backend/data/processed/labels.csv")  # adjust path
+# --- Setup paths ---
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
+from app.services.feature_extraction import extract_features
 
-# build features
+# --- Load dataset ---
+df = pd.read_csv("backend/data/processed/labels.csv")
+
+# --- Build features ---
+print("Extracting features...")
 X = pd.DataFrame([extract_features(u) for u in df['url']])
+
+# Drop non-numeric or unneeded columns
 if 'tld' in X.columns:
     X = X.drop(columns=['tld'])
+
 y = df['label']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-clf = RandomForestClassifier(n_estimators=200, random_state=42, n_jobs=-1)
-clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-print(classification_report(y_test, y_pred))
-print("ROC AUC:", roc_auc_score(y_test, clf.predict_proba(X_test)[:,1]))
+# --- Split data ---
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
 
-# save model
-os.makedirs("../models", exist_ok=True)
-joblib.dump(clf, "../models/rf_model.joblib")
-print("Saved model to ../models/rf_model.joblib")
+clf = RandomForestClassifier(
+    n_estimators=300,
+    max_depth=20,
+    min_samples_leaf=2,
+    class_weight="balanced",
+    random_state=42,
+    n_jobs=-1
+)
+
+
+print("Training model...")
+clf.fit(X_train, y_train)
+
+# --- Evaluate ---
+y_pred = clf.predict(X_test)
+proba = clf.predict_proba(X_test)[:, 1]
+
+print("\nEvaluation Report:")
+print(classification_report(y_test, y_pred, target_names=["safe (0)", "phish (1)"]))
+print(f"ROC AUC: {roc_auc_score(y_test, proba):.4f}")
+
+# --- Save model ---
+MODEL_DIR = os.path.join("backend", "models")
+os.makedirs(MODEL_DIR, exist_ok=True)
+MODEL_PATH = os.path.join(MODEL_DIR, "rf_model.joblib")
+
+joblib.dump(clf, MODEL_PATH)
+print(f"\nSaved balanced model to {MODEL_PATH}")

@@ -1,30 +1,72 @@
+import re
+import socket
+import whois
+import datetime
 from urllib.parse import urlparse
-import tldextract, math
-SUS_KWS = ["login","secure","account","update","confirm","bank","verify"]
 
-# Full Explanation of hostname entropy calculation:
-# The hostname entropy is a measure of the unpredictability or randomness of the hostname part of a URL.
-# It is calculated using the Shannon entropy formula, which takes into account the frequency of each character
-# in the hostname. A higher entropy value indicates a more complex and less predictable hostname, which is often
-# associated with malicious or phishing URLs.
-def hostname_entropy(s: str) -> float:
-    if not s: return 0.0
-    from collections import Counter
-    cnt = Counter(s); n=len(s)
-    return -sum((v/n)*math.log2(v/n) for v in cnt.values())
+def get_domain_age(domain):
+    """Returns domain age in days or -1 if lookup fails"""
+    try:
+        w = whois.whois(domain)
+        creation_date = w.creation_date
+        expiration_date = w.expiration_date
+        if isinstance(creation_date, list):
+            creation_date = creation_date[0]
+        if isinstance(expiration_date, list):
+            expiration_date = expiration_date[0]
+        if not creation_date or not expiration_date:
+            return -1
+        age_days = (datetime.datetime.now() - creation_date).days
+        return age_days
+    except Exception:
+        return -1
 
-def extract_features(url: str) -> dict:
-    p = urlparse(url)
-    host = p.hostname or ""
-    ext = tldextract.extract(url) #tldextract is used because it handles subdomains and TLDs better than urlparse
+def is_domain_resolvable(domain):
+    """Check if DNS resolution works"""
+    try:
+        socket.gethostbyname(domain)
+        return 1
+    except:
+        return 0
+
+def extract_features(url):
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+    path = parsed.path
+    query = parsed.query
+
+    # Lexical / structural features
     features = {
-        "url_len": len(url),
-        "is_https": 1 if p.scheme == "https" else 0,
-        "num_dots": host.count("."),
-        "num_hyphens": host.count("-"),
-        "has_at": 1 if "@" in url else 0,
-        "sus_kw_count": sum(1 for k in SUS_KWS if k in url.lower()),
-        "host_entropy": hostname_entropy(host),
-        "tld": ext.suffix or ""
+        "url_length": len(url),
+        "hostname_length": len(domain),
+        "path_length": len(path),
+        "count_digits": sum(c.isdigit() for c in url),
+        "count_special_chars": sum(c in "-_@#%&?=+" for c in url),
+        "count_dots": url.count('.'),
+        "count_subdirs": url.count('/'),
+        "count_params": url.count('&'),
+        "has_ip_address": 1 if re.search(r'\d{1,3}(?:\.\d{1,3}){3}', domain) else 0,
+        "has_https": 1 if parsed.scheme == "https" else 0,
+        "https_in_domain": 1 if "https" in domain else 0,
+        "domain_length": len(domain),
+        "tld_in_subdomain": 1 if re.search(r"\.(com|net|org|info|xyz|co|ru|tk)\.", domain) else 0,
+        "contains_login": 1 if "login" in url.lower() else 0,
+        "contains_secure": 1 if "secure" in url.lower() else 0,
+        "contains_bank": 1 if "bank" in url.lower() else 0,
+        "contains_verify": 1 if "verify" in url.lower() else 0,
+        "num_hyphens": url.count('-'),
+        "num_equal_signs": url.count('='),
+        "num_question_marks": url.count('?'),
     }
+
+    # Host-based / WHOIS features
+    features.update({
+        "domain_age_days": get_domain_age(domain),
+        "is_domain_resolvable": is_domain_resolvable(domain),
+    })
+
+    # Normalize failed WHOIS lookups
+    if features["domain_age_days"] < 0:
+        features["domain_age_days"] = 0
+
     return features
