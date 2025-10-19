@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from app.routes import urls
-from app.db import base
+from .routes import urls
+from .db import base
 
 app = FastAPI(title="Hybrid Phishing Detector API", version="0.1")
 

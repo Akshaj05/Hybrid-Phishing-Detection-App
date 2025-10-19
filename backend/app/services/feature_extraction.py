@@ -1,8 +1,24 @@
+from collections import Counter
+import math
 import re
 import socket
 import whois
 import datetime
 from urllib.parse import urlparse
+
+def calculate_entropy(text):
+    """Calculate Shannon entropy of a string"""
+    if not text:
+        return 0
+    entropy = 0
+    text_len = len(text)
+    # Count character frequencies
+    char_counts = Counter(text)
+    # Calculate entropy
+    for count in char_counts.values():
+        probability = count / text_len
+        entropy -= probability * math.log2(probability)
+    return entropy
 
 def get_domain_age(domain):
     """Returns domain age in days or -1 if lookup fails"""
@@ -35,18 +51,31 @@ def extract_features(url):
     path = parsed.path
     query = parsed.query
 
+    # Calculate entropy of the hostname
+    host_entropy = calculate_entropy(domain)
+
+    # Define suspicious keywords
+    suspicious_keywords = [
+        'login', 'secure', 'bank', 'verify', 'account', 'update', 'confirm',
+        'password', 'wallet', 'alert', 'authenticate', 'verification'
+    ]
+    
+    # Count suspicious keywords in URL
+    url_lower = url.lower()
+    sus_kw_count = sum(1 for kw in suspicious_keywords if kw in url_lower)
+
     # Lexical / structural features
     features = {
-        "url_length": len(url),
+        "url_len": len(url),
         "hostname_length": len(domain),
         "path_length": len(path),
         "count_digits": sum(c.isdigit() for c in url),
         "count_special_chars": sum(c in "-_@#%&?=+" for c in url),
-        "count_dots": url.count('.'),
+        "num_dots": url.count('.'),
         "count_subdirs": url.count('/'),
         "count_params": url.count('&'),
         "has_ip_address": 1 if re.search(r'\d{1,3}(?:\.\d{1,3}){3}', domain) else 0,
-        "has_https": 1 if parsed.scheme == "https" else 0,
+        "is_https": 1 if parsed.scheme == "https" else 0,
         "https_in_domain": 1 if "https" in domain else 0,
         "domain_length": len(domain),
         "tld_in_subdomain": 1 if re.search(r"\.(com|net|org|info|xyz|co|ru|tk)\.", domain) else 0,
@@ -57,6 +86,9 @@ def extract_features(url):
         "num_hyphens": url.count('-'),
         "num_equal_signs": url.count('='),
         "num_question_marks": url.count('?'),
+        "has_at": 1 if '@' in url else 0,
+        "sus_kw_count": sus_kw_count,
+        "host_entropy": host_entropy,
     }
 
     # Host-based / WHOIS features
