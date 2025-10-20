@@ -1,30 +1,44 @@
-import sys
+# test_report_generator.py
 import os
+import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app.services.report_generator import build_pdf_report
+from app.services.report_generator import generate_pdf_report
 
 def test_report_generator():
-    # Sample scan result JSON that mimics what your API returns
     scan_json = {
         "id": 6,
         "original_url": "https://paypal.com/",
         "final_url": "https://paypal.com/",
         "verdict": "suspicious",
-        "score": 45,
-        "heuristic_score": 35,  # Added for chart
-        "reasons": ["suspicious_keywords"],
+        # NOTE: score normalized 0..1
+        "score": 0.45,
+        # ML probability normalized 0..1
         "ml_prob": 0.62,
-        "time_ms": 1090
+        # heuristic score in 0..100
+        "heuristic_score": 35,
+        "time_ms": 1090,
+        "reasons": ["suspicious_keywords", "unusual_redirect"],
+        "features": {
+            "has_ip": 0,
+            "num_dots": 2,
+            "url_length": 28,
+            "contains_login_keyword": 1,
+            "age_domain_days": 45,
+            "uses_https": 1,
+            "whois_country": "US"
+        }
     }
-    
-    # Generate the PDF report
-    pdf_path = build_pdf_report(scan_json)
-    
-    print(f"PDF report generated at: {pdf_path}")
-    
-    # Open the PDF file (Windows)
-    os.system(f'start {pdf_path}')
+
+    out = generate_pdf_report(scan_json["original_url"], scan_json, output_path=f"report_test_{scan_json['id']}.pdf")
+    print("Generated:", out)
+
+    # Auto-open on Windows (works in PowerShell cmd)
+    try:
+        os.system(f"start {out}")
+    except Exception:
+        print("PDF created at:", out)
+
 
 if __name__ == "__main__":
     test_report_generator()
