@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">Hybrid_phishing_Detection</string>
+    <string name="app_name">SafeLink Analyzer</string>
+    <string name="login">Login</string>
+    <string name="signup">Sign Up</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="default_web_client_id">920905879637-s9snm32enko5a77vqeor8ga49kt2ii9l.apps.googleusercontent.com</string>
+
 </resources>
