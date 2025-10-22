@@ -8,3 +8,5 @@ requests
 matplotlib
 python-multipart
 sqlalchemy
+reportlab
+whois

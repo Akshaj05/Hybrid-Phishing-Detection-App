@@ -1,4 +1,6 @@
 package com.akshajramakrishnan.hybrid_phishing_detection.ui.main;
 
-public class SettingsActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class SettingsActivity extends AppCompatActivity {
 }
