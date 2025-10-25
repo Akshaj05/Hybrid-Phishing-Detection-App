@@ -43,7 +43,7 @@ def scan_url(req: ScanRequestSchema):
 
         if final_score < 30:
             verdict = "safe"
-        elif final_score < 70:
+        elif final_score < 60:
             verdict = "suspicious"
         else:
             verdict = "malicious"
@@ -74,7 +74,7 @@ def scan_url(req: ScanRequestSchema):
             "final_url": url,
             "verdict": verdict,
             "score": final_score,
-            "reasons": heur.get("reasons", []),
+            "reasons": heur.get("reasons", []), 
             "ml_prob": ml_prob,
             "time_ms": elapsed_ms
         }
