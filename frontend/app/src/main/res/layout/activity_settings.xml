@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:padding="16dp">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Appearance" android:textStyle="bold"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="8dp">
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Dark Mode" />
+            <Switch android:id="@+id/themeSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Security" android:textStyle="bold" android:layout_marginTop="16dp"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="8dp">
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Auto-block malicious links" />
+            <Switch android:id="@+id/autoBlockSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <Button android:id="@+id/btnChooseBrowser" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="Set default browser" android:layout_marginTop="12dp"/>
+
+        <Button android:id="@+id/btnBlockedList" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="View Blocked URLs" android:layout_marginTop="12dp"/>
+
+        <Button android:id="@+id/logoutBtn" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="Logout" android:layout_marginTop="18dp"/>
+    </LinearLayout>
+</ScrollView>

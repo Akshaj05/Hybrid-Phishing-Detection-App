@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/backBtn"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_back"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"/>
+
+        <TextView
+            android:id="@+id/urlText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="https://example.com"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/verdictText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verdict: Safe"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
+        <com.akshajramakrishnan.hybrid_phishing_detection.ui.widget.GradiantBarView
+            android:id="@+id/gradientBarView"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginTop="12dp"/>
+
+        <!-- Extra info -->
+        <TextView
+            android:id="@+id/extraInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Details: ML prob, heuristics reasons, time (ms)."
+            android:layout_marginTop="12dp"/>
+
+        <!-- Actions -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="12dp">
+
+            <Button android:id="@+id/redirectBtn" android:layout_width="0dp"
+                android:layout_weight="1" android:layout_height="wrap_content" android:text="Open"/>
+
+            <Button android:id="@+id/saveBtn" android:layout_width="0dp"
+                android:layout_weight="1" android:layout_height="wrap_content" android:text="Block"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <Button android:id="@+id/reportBtn" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="Download Report" android:layout_marginTop="12dp"/>
+
+    </LinearLayout>
+</ScrollView>

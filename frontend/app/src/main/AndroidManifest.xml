@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.akshajramakrishnan.hybrid_phishing_detection">
-
     <!-- ✅ Permissions -->
     <uses-feature
         android:name="android.hardware.camera"
@@ -12,7 +11,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
 
     <application
@@ -25,65 +25,64 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Hybrid_phishing_Detection"
-        tools:targetApi="31">
-
+        tools:targetApi="31"
+        android:networkSecurityConfig="@xml/network_security_config">
+        <activity
+            android:name=".ui.main.ScanResultActivity"
+            android:exported="false" />
         <!-- ✅ Firebase initialization -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_launcher_foreground" />
-
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorPrimary" />
-
-        <!-- ✅ Main Launcher Activity -->
+            android:resource="@color/colorPrimary" /> <!-- ✅ Main Launcher Activity -->
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.Hybrid_phishing_Detection">
+            android:theme="@style/Theme.Hybrid_phishing_Detection"
+            android:windowSoftInputMode="adjustResize">
 
             <!-- ✅ Handle “Open with SafeLinkAnalyzer” for URLs -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="http" />
                 <data android:scheme="https" />
             </intent-filter>
-        </activity>
-
-        <!-- ✅ Authentication Activities -->
+        </activity> <!-- ✅ Authentication Activities -->
+        <activity
+            android:name=".ui.main.BlockedListActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Hybrid_phishing_Detection"
-            >
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.auth.SignupActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.Hybrid_phishing_Detection" />
+            android:theme="@style/Theme.Hybrid_phishing_Detection"
+            android:windowSoftInputMode="adjustResize" />
 
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
         <meta-data
             android:name="default_web_client_id"
             android:value="@string/default_web_client_id" />
-
         <meta-data
             android:name="backend_api_base_url"
-            android:value="http://127.0.0.1:8000/"/>
-
+            android:value="http://127.0.0.1:8000/" />
     </application>
 
 </manifest>

@@ -5,4 +5,5 @@
     <color name="background">#121212</color>
     <color name="textPrimary">#FFFFFF</color>
     <color name="buttonText">#FFFFFF</color>
+    <color name="outline_color">#444444</color>
 </resources>

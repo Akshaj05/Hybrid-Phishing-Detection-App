@@ -4,11 +4,11 @@
         <item name="colorSecondary">@color/colorSecondary</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="android:textColor">@color/textPrimary</item>
-<!--        <item name="android:buttonStyle">@style/CustomButtonStyle</item>-->
+        <item name="android:buttonStyle">@style/CustomButtonStyle</item>
     </style>
 
-<!--    <style name="CustomButtonStyle" parent="Widget.MaterialComponents.Button">-->
-<!--        <item name="android:background">@drawable/custom_button</item>-->
-<!--        <item name="android:textColor">@color/buttonText</item>-->
-<!--    </style>-->
+    <style name="CustomButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="android:background">@drawable/custom_button</item>
+        <item name="android:textColor">@color/buttonText</item>
+    </style>
 </resources>
