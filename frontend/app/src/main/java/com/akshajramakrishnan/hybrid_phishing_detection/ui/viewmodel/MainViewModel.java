@@ -1,6 +1,7 @@
 package com.akshajramakrishnan.hybrid_phishing_detection.ui.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -38,6 +39,7 @@ public class MainViewModel extends AndroidViewModel {
         pref = new SharedPrefManager(application.getApplicationContext());
     }
 
+
     public LiveData<UrlResponse> getScanResult() {
         return scanResult;
     }
@@ -47,44 +49,32 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void scanUrl(String url) {
+        Log.d("SCAN_REQ", new com.google.gson.Gson().toJson(new UrlRequest(url)));
         apiService.scanUrl(new UrlRequest(url)).enqueue(new Callback<UrlResponse>() {
             @Override
             public void onResponse(Call<UrlResponse> call, Response<UrlResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     UrlResponse res = response.body();
+                    Log.d("SCAN_RESULT_DEBUG", "Response from backend → " + new com.google.gson.Gson().toJson(res));
+
+                    // Post result
                     scanResult.postValue(res);
 
-                    // ✅ Prepare to store scan in Room
-                    String uid = pref.getUid();
-                    if (uid == null || uid.isEmpty()) {
-                        uid = "guest";
-                    }
-
+                    // Save to Room
                     UrlScan scan = new UrlScan(
-                            uid,
+                            pref.getUid() != null ? pref.getUid() : "guest",
                             url,
                             res.getFinalUrl(),
                             res.getVerdict(),
                             res.getScore(),
                             res.getMlProb(),
-                            System.currentTimeMillis()
+                            res.getTimeMs()  // ✅ use backend’s actual timeMs
                     );
-
-                    // TODO (optional): You could later add res.getReasons() and res.getFeatures()
-                    // fields to UrlScan if you decide to store them too.
-
-                    executor.execute(() -> {
-                        try {
-                            database.urlScanDao().insertUrlScan(scan);
-                        } catch (Exception e) {
-                            errorLiveData.postValue("DB insert error: " + e.getMessage());
-                        }
-                    });
-
-                } else {
-                    errorLiveData.postValue("Server error: " + response.code());
+                    new Thread(() -> database.urlScanDao().insertUrlScan(scan)).start();
                 }
             }
+
+
 
             @Override
             public void onFailure(Call<UrlResponse> call, Throwable t) {

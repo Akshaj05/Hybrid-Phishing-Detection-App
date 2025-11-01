@@ -3,6 +3,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
+
 def model_available():
     model_path = os.path.join("backend", "models", "rf_model.joblib")
     return os.path.exists(model_path)

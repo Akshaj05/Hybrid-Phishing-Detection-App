@@ -60,7 +60,14 @@ public class HomeActivity extends Fragment {
         i.putExtra("final_url", res.getFinalUrl());
         i.putExtra("verdict", res.getVerdict());
         i.putExtra("score", res.getScore());
-        startActivity(i);
+        i.putExtra("ml_prob", res.getMlProb());    // ✅ include ML probability
+        i.putExtra("time_ms", res.getTimeMs());    // ✅ include scan time
+
+        if (res.getReasons() != null && !res.getReasons().isEmpty()) {
+            i.putExtra("reasons", res.getReasons().toArray(new String[0])); // ✅ for reasons display
+        }
+
+        getContext().startActivity(i);
     }
 
     private void onScanError(String error) {
