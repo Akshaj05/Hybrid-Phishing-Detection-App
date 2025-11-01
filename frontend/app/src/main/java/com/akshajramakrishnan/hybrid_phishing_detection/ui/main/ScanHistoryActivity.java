@@ -41,6 +41,9 @@ public class ScanHistoryActivity extends Fragment {
         recyclerView = v.findViewById(R.id.historyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        recyclerView.setPadding(8, 8, 8, 8);
+        recyclerView.setClipToPadding(false);
+
         db = AppDatabase.getInstance(requireContext());
         pref = new SharedPrefManager(requireContext());
         adapter = new HistoryAdapter(scans);

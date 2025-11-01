@@ -3,6 +3,7 @@ package com.akshajramakrishnan.hybrid_phishing_detection.ui.main;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -31,7 +32,10 @@ public class BlockedListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blocked_list);
 
-        recyclerView = findViewById(R.id.blockedRecycler);
+        ImageButton backBtn = findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(v -> onBackPressed());
+
+        recyclerView = findViewById(R.id.blockedRecyclerView);
         clearAllBtn = findViewById(R.id.btnClearBlocked);
         pref = new SharedPrefManager(this);
         db = AppDatabase.getInstance(this);

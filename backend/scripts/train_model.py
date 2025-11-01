@@ -32,8 +32,7 @@ clf = RandomForestClassifier(
     n_estimators=300,
     max_depth=20,
     min_samples_leaf=2,
-    class_weight="balanced",
-    random_state=42,
+    random_state=37,
     n_jobs=-1
 )
 

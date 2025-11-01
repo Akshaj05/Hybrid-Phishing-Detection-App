@@ -1,5 +1,6 @@
 package com.akshajramakrishnan.hybrid_phishing_detection.ui.main;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -30,7 +31,7 @@ public class ScanResultActivity extends AppCompatActivity {
 
     public static final String EXTRA_SCAN_ID = "extra_scan_id";
 
-    private TextView verdictText, scoreText, urlText, extraInfo;
+    private TextView verdictText, urlText, extraInfo;
     private GradiantBarView gradientBarView;
     private Button redirectBtn, saveBtn, reportBtn;
     private ImageButton backBtn;
@@ -38,6 +39,7 @@ public class ScanResultActivity extends AppCompatActivity {
     private int score;
     private MainRepository repo;
     private SharedPrefManager pref;
+    private UrlScan currentScan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +51,6 @@ public class ScanResultActivity extends AppCompatActivity {
 
         urlText = findViewById(R.id.urlText);
         verdictText = findViewById(R.id.verdictText);
-        scoreText = findViewById(R.id.scoreText);
         gradientBarView = findViewById(R.id.gradientBarView);
         extraInfo = findViewById(R.id.extraInfo);
 
@@ -68,7 +69,8 @@ public class ScanResultActivity extends AppCompatActivity {
                 finalUrl = intent.getStringExtra("final_url");
                 verdict = intent.getStringExtra("verdict");
                 score = intent.getIntExtra("score", 0);
-                updateUI(originalUrl, finalUrl, verdict, score);
+                updateUI(originalUrl, finalUrl, verdict, score, 0.62, 1090);
+
             }
         }
 
@@ -99,61 +101,63 @@ public class ScanResultActivity extends AppCompatActivity {
         });
 
         reportBtn.setOnClickListener(v -> {
+            if (originalUrl == null || verdict == null) {
+                Toast.makeText(this, "Scan data not available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Toast.makeText(this, "Generating report...", Toast.LENGTH_SHORT).show();
 
             ApiService api = RetrofitClient.getApiService();
 
-            // Build scan_json like your Python test_report_generator.py
-            Map<String, Object> scanJson = new HashMap<>();
-            scanJson.put("id", System.currentTimeMillis());
-            scanJson.put("original_url", originalUrl);
-            scanJson.put("final_url", finalUrl);
-            scanJson.put("verdict", verdict);
-            scanJson.put("score", score / 100.0);  // normalize to 0–1
-            scanJson.put("ml_prob", 0.62); // replace with actual ML prob if available
-            scanJson.put("heuristic_score", score);
-            scanJson.put("time_ms", 1090);
+            // ✅ Build metadata exactly as backend expects
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("original_url", originalUrl);
+            metadata.put("final_url", finalUrl);
+            metadata.put("verdict", verdict);
+            metadata.put("score", score / 100.0);  // normalized to 0–1
+            metadata.put("ml_prob", currentScan != null ? currentScan.getMlProb() : 0.0);
+            metadata.put("heuristic_score", score);
+            metadata.put("time_ms", currentScan != null ? currentScan.getTimestamp() : System.currentTimeMillis());
 
-            // example nested objects
-            scanJson.put("reasons", new String[]{"keyword_check", "ssl_mismatch"});
+            // ✅ features — same structure your backend already parses
             Map<String, Object> features = new HashMap<>();
-            features.put("has_ip", 0);
-            features.put("num_dots", 3);
+            features.put("has_ip", originalUrl.matches(".*\\d+\\.\\d+\\.\\d+\\.\\d+.*") ? 1 : 0);
+            features.put("num_dots", originalUrl.length() - originalUrl.replace(".", "").length());
             features.put("url_length", originalUrl.length());
-            features.put("contains_login_keyword", originalUrl.contains("login") ? 1 : 0);
-            features.put("age_domain_days", 40);
+            features.put("contains_login_keyword", originalUrl.toLowerCase().contains("login") ? 1 : 0);
             features.put("uses_https", originalUrl.startsWith("https") ? 1 : 0);
             features.put("whois_country", "US");
-            scanJson.put("features", features);
+            metadata.put("features", features);
 
-            api.generateReport(scanJson).enqueue(new retrofit2.Callback<ResponseBody>() {
+            api.generateReport(metadata).enqueue(new retrofit2.Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         try {
-                            // Save PDF locally
-                            java.io.File downloadsDir = new java.io.File(getExternalFilesDir(null), "reports");
-                            if (!downloadsDir.exists()) downloadsDir.mkdirs();
+                            // Save PDF
+                            java.io.File reportsDir = new java.io.File(getExternalFilesDir(null), "reports");
+                            if (!reportsDir.exists()) reportsDir.mkdirs();
 
                             String fileName = "SafeLink_Report_" + System.currentTimeMillis() + ".pdf";
-                            java.io.File pdfFile = new java.io.File(downloadsDir, fileName);
+                            java.io.File pdfFile = new java.io.File(reportsDir, fileName);
 
-                            java.io.InputStream inputStream = response.body().byteStream();
-                            java.io.OutputStream outputStream = new java.io.FileOutputStream(pdfFile);
-
+                            java.io.InputStream in = response.body().byteStream();
+                            java.io.OutputStream out = new java.io.FileOutputStream(pdfFile);
                             byte[] buffer = new byte[4096];
                             int bytesRead;
-                            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                                outputStream.write(buffer, 0, bytesRead);
-                            }
-                            outputStream.flush();
-                            inputStream.close();
-                            outputStream.close();
+                            while ((bytesRead = in.read(buffer)) != -1) out.write(buffer, 0, bytesRead);
+                            out.flush();
+                            in.close();
+                            out.close();
 
-                            Toast.makeText(ScanResultActivity.this, "Report saved: " + pdfFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(ScanResultActivity.this,
+                                    "Report saved: " + pdfFile.getAbsolutePath(),
+                                    Toast.LENGTH_LONG).show();
 
                             Intent openIntent = new Intent(Intent.ACTION_VIEW);
-                            openIntent.setDataAndType(androidx.core.content.FileProvider.getUriForFile(
+                            openIntent.setDataAndType(
+                                    androidx.core.content.FileProvider.getUriForFile(
                                             ScanResultActivity.this,
                                             getPackageName() + ".provider",
                                             pdfFile),
@@ -162,19 +166,25 @@ public class ScanResultActivity extends AppCompatActivity {
                             startActivity(Intent.createChooser(openIntent, "Open Report"));
 
                         } catch (Exception e) {
-                            Toast.makeText(ScanResultActivity.this, "Error saving report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ScanResultActivity.this,
+                                    "Error saving report: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(ScanResultActivity.this, "Failed to generate report", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ScanResultActivity.this,
+                                "Failed to generate report", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Toast.makeText(ScanResultActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ScanResultActivity.this,
+                            "Error: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
         });
+
 
 
     }
@@ -183,13 +193,17 @@ public class ScanResultActivity extends AppCompatActivity {
         AsyncTask.execute(() -> {
             UrlScan scan = repo.getScanById(id);
             runOnUiThread(() -> {
-                if (scan != null) updateUI(scan.getOriginalUrl(), scan.getFinalUrl(), scan.getVerdict(), scan.getScore());
+                if (scan != null)
+                    updateUI(scan.getOriginalUrl(), scan.getFinalUrl(), scan.getVerdict(),
+                            scan.getScore(), scan.getMlProb(), scan.getTimestamp());
                 else Toast.makeText(this, "Scan not found", Toast.LENGTH_SHORT).show();
             });
         });
     }
 
-    private void updateUI(String original, String finalU, String verdict, int score) {
+    @SuppressLint("DefaultLocale")
+    private void updateUI(String original, String finalU, String verdict, int score, double mlProb, long timeMs)
+    {
         this.originalUrl = original;
         this.finalUrl = finalU;
         this.verdict = verdict;
@@ -218,7 +232,11 @@ public class ScanResultActivity extends AppCompatActivity {
         }
 
         if (gradientBarView != null) gradientBarView.setScore(score);
-        extraInfo.setText("ML Probability: — | Time: — ms");
+
+        extraInfo.setText(String.format(
+                "ML Probability: %.1f%% | Scan Time: %d ms",
+                mlProb * 100, timeMs
+        ));
     }
 
 }

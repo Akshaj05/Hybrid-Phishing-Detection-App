@@ -9,11 +9,15 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 public class GradiantBarView extends View {
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float scoreFraction = 0.0f; // 0.0 to 1.0
+
+    private int textColor;
+    private int pointerColor;
 
     public GradiantBarView(Context context) {
         super(context);
@@ -27,6 +31,18 @@ public class GradiantBarView extends View {
     private void init() {
         setMinimumHeight(40);
         paint.setStrokeWidth(6f);
+
+        int nightMode = getResources().getConfiguration().uiMode &
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+
+        if (nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+            textColor = ContextCompat.getColor(getContext(), android.R.color.white);
+            pointerColor = ContextCompat.getColor(getContext(), android.R.color.white);
+        } else {
+            textColor = ContextCompat.getColor(getContext(), android.R.color.black);
+            pointerColor = ContextCompat.getColor(getContext(), android.R.color.black);
+        }
+
     }
 
     /** Set the score in range 0–100 */
@@ -56,11 +72,12 @@ public class GradiantBarView extends View {
 
         // Draw pointer (black line)
         float px = scoreFraction * w;
-        paint.setColor(0xFF000000);
+        paint.setColor(pointerColor);
         canvas.drawLine(px, h * 0.1f, px, h * 0.75f, paint);
 
         // Draw percentage text below pointer
         paint.setTextSize(35f);
+        paint.setColor(textColor);
         String text = Math.round(scoreFraction * 100) + "%";
         float textWidth = paint.measureText(text);
         float x = Math.max(0, Math.min(px - textWidth / 2, w - textWidth));

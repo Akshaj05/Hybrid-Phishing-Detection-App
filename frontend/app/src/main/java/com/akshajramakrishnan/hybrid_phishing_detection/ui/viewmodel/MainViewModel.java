@@ -15,6 +15,9 @@ import com.akshajramakrishnan.hybrid_phishing_detection.network.ApiService;
 import com.akshajramakrishnan.hybrid_phishing_detection.network.RetrofitClient;
 import com.akshajramakrishnan.hybrid_phishing_detection.util.SharedPrefManager;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -26,6 +29,7 @@ public class MainViewModel extends AndroidViewModel {
     private final ApiService apiService;
     private final AppDatabase database;
     private final SharedPrefManager pref;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public MainViewModel(@NonNull Application application) {
         super(application);
@@ -50,10 +54,10 @@ public class MainViewModel extends AndroidViewModel {
                     UrlResponse res = response.body();
                     scanResult.postValue(res);
 
-                    // ✅ Save scan in Room DB with userId
+                    // ✅ Prepare to store scan in Room
                     String uid = pref.getUid();
                     if (uid == null || uid.isEmpty()) {
-                        uid = "guest"; // fallback for non-logged users
+                        uid = "guest";
                     }
 
                     UrlScan scan = new UrlScan(
@@ -66,7 +70,17 @@ public class MainViewModel extends AndroidViewModel {
                             System.currentTimeMillis()
                     );
 
-                    new Thread(() -> database.urlScanDao().insertUrlScan(scan)).start();
+                    // TODO (optional): You could later add res.getReasons() and res.getFeatures()
+                    // fields to UrlScan if you decide to store them too.
+
+                    executor.execute(() -> {
+                        try {
+                            database.urlScanDao().insertUrlScan(scan);
+                        } catch (Exception e) {
+                            errorLiveData.postValue("DB insert error: " + e.getMessage());
+                        }
+                    });
+
                 } else {
                     errorLiveData.postValue("Server error: " + response.code());
                 }
