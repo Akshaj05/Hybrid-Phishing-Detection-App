@@ -27,6 +27,7 @@ public class MainViewModel extends AndroidViewModel {
 
     private final MutableLiveData<UrlResponse> scanResult = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> incomingUrlLiveData = new MutableLiveData<>();
     private final ApiService apiService;
     private final AppDatabase database;
     private final SharedPrefManager pref;
@@ -46,6 +47,14 @@ public class MainViewModel extends AndroidViewModel {
 
     public LiveData<String> getErrorLiveData() {
         return errorLiveData;
+    }
+
+    public LiveData<String> getIncomingUrl() {
+        return incomingUrlLiveData;
+    }
+
+    public void setIncomingUrl(String url) {
+        incomingUrlLiveData.postValue(url);
     }
 
     public void scanUrl(String url) {

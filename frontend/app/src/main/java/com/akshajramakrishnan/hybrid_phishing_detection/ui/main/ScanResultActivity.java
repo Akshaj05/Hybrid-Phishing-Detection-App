@@ -2,9 +2,12 @@ package com.akshajramakrishnan.hybrid_phishing_detection.ui.main;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -24,8 +27,10 @@ import com.akshajramakrishnan.hybrid_phishing_detection.util.SharedPrefManager;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -95,16 +100,51 @@ public class ScanResultActivity extends AppCompatActivity {
                 Toast.makeText(this, "No URL to open", Toast.LENGTH_SHORT).show();
                 return;
             }
-            String pkg = pref.getDefaultBrowserPackage();
-            Intent open;
-            if (pkg != null && !pkg.isEmpty()) {
-                open = new Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl));
-                open.setPackage(pkg);
-            } else {
-                open = new Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl));
+
+            Uri uri = Uri.parse(finalUrl);
+
+            // List of browser package names (priority order)
+            String[] browsers = new String[]{
+                    "com.android.chrome",
+                    "com.sec.android.app.sbrowser",
+                    "org.mozilla.firefox",
+                    "com.brave.browser",
+                    "com.opera.browser",
+                    "com.microsoft.emmx"
+            };
+
+            boolean opened = false;
+
+            for (String browser : browsers) {
+                try {
+                    Intent intent1 = new Intent(Intent.ACTION_VIEW, uri);
+                    intent1.setPackage(browser);
+                    intent1.addCategory(Intent.CATEGORY_BROWSABLE);
+                    intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getPackageManager().getPackageInfo(browser, 0); // Check if installed
+                    startActivity(intent1);
+                    Toast.makeText(this, "Opening in " + browser, Toast.LENGTH_SHORT).show();
+                    opened = true;
+                    break;
+                } catch (Exception ignored) { }
             }
-            startActivity(open);
+
+            if (!opened) {
+                try {
+                    Intent fallback = new Intent(Intent.ACTION_VIEW, uri);
+                    fallback.addCategory(Intent.CATEGORY_BROWSABLE);
+                    fallback.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(fallback);
+                    Toast.makeText(this, "Opening in default browser", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(this, "No browser found!", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
+
+
+
+
 
         saveBtn.setOnClickListener(v -> {
             String uid = pref.getUid();
@@ -152,6 +192,7 @@ public class ScanResultActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
+                        // ✅ Create folder and save PDF
                         java.io.File reportsDir = new java.io.File(getExternalFilesDir(null), "reports");
                         if (!reportsDir.exists()) reportsDir.mkdirs();
                         String fileName = "SafeLink_Report_" + System.currentTimeMillis() + ".pdf";
@@ -170,17 +211,29 @@ public class ScanResultActivity extends AppCompatActivity {
                                 "Report saved: " + pdfFile.getAbsolutePath(),
                                 Toast.LENGTH_LONG).show();
 
+                        // ✅ Build a content URI for FileProvider
+                        Uri uri = androidx.core.content.FileProvider.getUriForFile(
+                                ScanResultActivity.this,
+                                getPackageName() + ".provider",
+                                pdfFile
+                        );
+
+                        // ✅ Prepare the intent to open PDF
                         Intent openIntent = new Intent(Intent.ACTION_VIEW);
-                        openIntent.setDataAndType(
-                                androidx.core.content.FileProvider.getUriForFile(
-                                        ScanResultActivity.this,
-                                        getPackageName() + ".provider",
-                                        pdfFile),
-                                "application/pdf");
-                        openIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(Intent.createChooser(openIntent, "Open Report"));
+                        openIntent.setDataAndType(uri, "application/pdf");
+                        openIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+                        // ✅ Auto open if viewer exists
+                        if (openIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(openIntent);
+                        } else {
+                            Toast.makeText(ScanResultActivity.this,
+                                    "PDF saved but no viewer app installed.\nFile: " + pdfFile.getAbsolutePath(),
+                                    Toast.LENGTH_LONG).show();
+                        }
 
                     } catch (Exception e) {
+                        e.printStackTrace();
                         Toast.makeText(ScanResultActivity.this,
                                 "Error saving report: " + e.getMessage(),
                                 Toast.LENGTH_SHORT).show();

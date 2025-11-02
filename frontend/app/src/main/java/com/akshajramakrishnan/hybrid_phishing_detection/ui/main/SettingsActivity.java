@@ -1,11 +1,18 @@
 package com.akshajramakrishnan.hybrid_phishing_detection.ui.main;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -18,10 +25,15 @@ import com.akshajramakrishnan.hybrid_phishing_detection.util.SharedPrefManager;
 import com.akshajramakrishnan.hybrid_phishing_detection.util.ThemeUtils;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 public class SettingsActivity extends Fragment {
 
     private Switch themeSwitch, autoBlockSwitch;
-    private Button btnBlockedList, btnChooseBrowser, btnLogout, btnChangeEmail;
+    private Button btnBlockedList, btnLogout, btnChangeEmail;
     private SharedPrefManager pref;
 
     @Nullable
@@ -36,7 +48,6 @@ public class SettingsActivity extends Fragment {
         themeSwitch = v.findViewById(R.id.themeSwitch);
         autoBlockSwitch = v.findViewById(R.id.autoBlockSwitch);
         btnBlockedList = v.findViewById(R.id.btnBlockedList);
-        btnChooseBrowser = v.findViewById(R.id.btnChooseBrowser);
         btnLogout = v.findViewById(R.id.logoutBtn);
 
         // 🔹 Initialize SharedPrefManager
@@ -71,11 +82,6 @@ public class SettingsActivity extends Fragment {
                 startActivity(new Intent(requireContext(), BlockedListActivity.class))
         );
 
-        // 🔹 Choose browser intent
-        btnChooseBrowser.setOnClickListener(x -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("http://"));
-            startActivity(Intent.createChooser(intent, "Choose default browser"));
-        });
 
         // 🔹 Logout
         btnLogout.setOnClickListener(x -> {

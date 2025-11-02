@@ -63,4 +63,7 @@ public class SharedPrefManager {
     public String getDefaultBrowserPackage() {
         return prefs.getString(KEY_BROWSER_PKG, "");
     }
+    public void saveDefaultBrowserPackage(String pkg) {
+        prefs.edit().putString("default_browser_pkg", pkg).apply();
+    }
 }

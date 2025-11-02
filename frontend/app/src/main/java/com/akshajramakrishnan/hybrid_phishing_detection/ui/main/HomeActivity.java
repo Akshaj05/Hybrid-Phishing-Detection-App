@@ -34,21 +34,28 @@ public class HomeActivity extends Fragment {
         urlInput = v.findViewById(R.id.urlInput);
         scanBtn = v.findViewById(R.id.scanButton);
 
-        // ✅ Initialize ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        // ✅ Observe LiveData
         viewModel.getScanResult().observe(getViewLifecycleOwner(), this::onScanSuccess);
         viewModel.getErrorLiveData().observe(getViewLifecycleOwner(), this::onScanError);
 
-        // ✅ Button click
+
         scanBtn.setOnClickListener(x -> {
             String url = urlInput.getText().toString().trim();
             if (url.isEmpty()) {
                 Toast.makeText(requireContext(), "Enter a URL", Toast.LENGTH_SHORT).show();
                 return;
             }
-            viewModel.scanUrl(url); // 👈 call ViewModel now
+            viewModel.scanUrl(url);
+        });
+
+        viewModel.getIncomingUrl().observe(getViewLifecycleOwner(), incomingUrl -> {
+            if (incomingUrl != null && !incomingUrl.isEmpty()) {
+                urlInput.setText(incomingUrl);
+                Toast.makeText(requireContext(), "Scanning external link...", Toast.LENGTH_SHORT).show();
+                viewModel.scanUrl(incomingUrl);
+                viewModel.setIncomingUrl(null); // reset to prevent duplicate scans
+            }
         });
 
         return v;
