@@ -45,6 +45,8 @@ public class ScanResultActivity extends AppCompatActivity {
     private Button redirectBtn, saveBtn, reportBtn;
     private ImageButton backBtn;
     private String finalUrl, originalUrl, verdict;
+    private int heuristicScore;
+
     private int score;
     private double mlProb;
     private long timeMs;
@@ -82,6 +84,7 @@ public class ScanResultActivity extends AppCompatActivity {
                 mlProb = intent.getDoubleExtra("ml_prob", 0.0);
                 timeMs = intent.getLongExtra("time_ms", 0);
                 reasons = intent.getStringArrayExtra("reasons");
+                heuristicScore = intent.getIntExtra("heuristic_score", 0);
 
                 Log.d("SCAN_RESULT", "verdict=" + verdict +
                         ", score=" + score +
@@ -175,7 +178,7 @@ public class ScanResultActivity extends AppCompatActivity {
         metadata.put("verdict", verdict);
         metadata.put("score", score / 100.0);
         metadata.put("ml_prob", mlProb);
-        metadata.put("heuristic_score", score);
+        metadata.put("heuristic_score", heuristicScore);
         metadata.put("time_ms", timeMs);
 
         Map<String, Object> features = new HashMap<>();
@@ -299,7 +302,7 @@ public class ScanResultActivity extends AppCompatActivity {
         if (gradientBarView != null) gradientBarView.setScore(score);
 
         StringBuilder info = new StringBuilder(
-                String.format("ML Probability: %.1f%% | Scan Time: %d ms", mlProb * 100, timeMs)
+                String.format("Heuristic Score: %d | ML Probability: %.1f%% | Scan Time: %d ms",heuristicScore, mlProb * 100, timeMs)
         );
 
         if (reasons != null && reasons.length > 0 &&

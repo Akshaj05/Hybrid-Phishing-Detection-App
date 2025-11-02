@@ -15,6 +15,7 @@ public class UrlResponse {
 
     private String verdict;
     private int score;
+    private int heuristic_score;
     private List<String> reasons;
 
     @SerializedName("ml_prob")
@@ -31,4 +32,6 @@ public class UrlResponse {
     public List<String> getReasons() { return reasons; }
     public double getMlProb() { return mlProb; }
     public long getTimeMs() { return timeMs; }
+
+    public int getHeuristicScore() { return heuristic_score; }
 }

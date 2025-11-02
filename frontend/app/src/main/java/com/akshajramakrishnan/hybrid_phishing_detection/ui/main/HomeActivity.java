@@ -69,6 +69,7 @@ public class HomeActivity extends Fragment {
         i.putExtra("score", res.getScore());
         i.putExtra("ml_prob", res.getMlProb());    // ✅ include ML probability
         i.putExtra("time_ms", res.getTimeMs());    // ✅ include scan time
+        i.putExtra("heuristic_score", res.getHeuristicScore());
 
         if (res.getReasons() != null && !res.getReasons().isEmpty()) {
             i.putExtra("reasons", res.getReasons().toArray(new String[0])); // ✅ for reasons display

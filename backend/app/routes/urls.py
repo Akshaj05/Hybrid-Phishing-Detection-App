@@ -53,6 +53,7 @@ def scan_url(req: ScanRequestSchema):
     # Persist to Backend DB
     scan_record = {
         "original_url": url,
+        "heuristic_score": heuristic_score,
         "final_url": url,
         "verdict": verdict,
         "score": final_score,
@@ -76,7 +77,8 @@ def scan_url(req: ScanRequestSchema):
             "score": final_score,
             "reasons": heur.get("reasons", []), 
             "ml_prob": ml_prob,
-            "time_ms": elapsed_ms
+            "time_ms": elapsed_ms,
+            "heuristic_score": heuristic_score,
         }
         return response
     except Exception as e:

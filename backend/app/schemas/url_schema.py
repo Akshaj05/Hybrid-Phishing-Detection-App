@@ -13,4 +13,5 @@ class ScanResponseSchema(BaseModel):
     score: int
     reasons: List[str]
     ml_prob: Optional[float] = None
+    heuristic_score: Optional[int] = 0
     time_ms: int

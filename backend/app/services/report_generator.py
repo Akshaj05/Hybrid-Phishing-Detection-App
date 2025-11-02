@@ -450,26 +450,37 @@ def draw_verdict_bar(c, x, y, width, height, score):
     c.drawString(x + width - 55, y - 16, "Phishing")
 
 
-def _create_score_chart(ml_prob, heuristic_score, path):
+def _create_score_chart(ml_prob, heuristic_score, final_score, path):
     """
-    Create a small bar chart (matplotlib) comparing ML prob and heuristic score.
-    ml_prob: float 0..1
-    heuristic_score: numeric (0..100)
-    path: where to save png
+    Create a clear bar chart comparing ML Probability, Heuristic Score, and Final Score.
     """
-    labels = ["ML Probability", "Heuristic Score"]
-    values = [ml_prob * 100, heuristic_score]
-    plt.figure(figsize=(3.0, 2.2), dpi=100)
-    bars = plt.bar(labels, values)
+    labels = ["ML Probability", "Heuristic Score", "Final Score"]
+    values = [ml_prob * 100, heuristic_score, final_score]
+
+    plt.figure(figsize=(4.2, 2.8), dpi=150)
+    bars = plt.bar(labels, values, width=0.4)
+
     plt.ylim(0, 100)
     plt.ylabel("Score (%)")
     plt.title("Score Comparison")
-    # Add numeric labels on bars
+
     for bar, val in zip(bars, values):
-        plt.text(bar.get_x() + bar.get_width()/2, val + 2, f"{val:.1f}", ha='center', va='bottom', fontsize=8)
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            val + 3,
+            f"{val:.1f}%",
+            ha='center',
+            va='bottom',
+            fontsize=9,
+            fontweight='bold'
+        )
+
+    # Improve layout
     plt.tight_layout()
     plt.savefig(path, bbox_inches="tight")
     plt.close()
+
+
 
 
 def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf"):
@@ -549,11 +560,11 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
     tmp_chart = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     tmp_chart.close()
     try:
-        _create_score_chart(ml_prob, heuristic, tmp_chart.name)
+        _create_score_chart(ml_prob, heuristic, score, tmp_chart.name)
         # place the chart on PDF
         chart_x = margin_left + 20
-        chart_w = 260
-        chart_h = 140
+        chart_w = 360
+        chart_h = 180
         c.drawImage(tmp_chart.name, chart_x, current_y - chart_h, width=chart_w, height=chart_h)
     finally:
         # we'll delete after saving PDF
