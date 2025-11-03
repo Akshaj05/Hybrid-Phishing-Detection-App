@@ -11,14 +11,18 @@ public class OverlayActionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        Log.d("OVERLAY_RECEIVER", "Broadcast received: " + action);
+
         if ("com.akshajramakrishnan.hybrid_phishing_detection.SCAN_URL".equals(action)) {
             String url = intent.getStringExtra("url");
-            Log.d("OVERLAY_RECEIVER", "Received URL from overlay: " + url);
+            Log.d("OVERLAY_RECEIVER", "URL received: " + url);
 
             Intent openApp = new Intent(context, MainActivity.class);
             openApp.putExtra("copied_url", url);
             openApp.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(openApp);
+
+            Log.d("OVERLAY_RECEIVER", "Launching app with URL...");
         }
     }
 }

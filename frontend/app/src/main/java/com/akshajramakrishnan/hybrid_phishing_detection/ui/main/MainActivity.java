@@ -29,59 +29,60 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // ✅ Navigation
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
-        if (navHostFragment == null) throw new IllegalStateException("NavHostFragment not found!");
+        if (navHostFragment == null) {
+            throw new IllegalStateException("NavHostFragment not found!");
+        }
+
         NavController navController = navHostFragment.getNavController();
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         NavigationUI.setupWithNavController(bottomNav, navController);
 
-        // ✅ ViewModel setup
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        // ✅ Handle URLs from intents
-        handleIncomingUrl(getIntent());
+        // Handle any incoming intent
+        handleIncomingIntent(getIntent());
 
-        // ✅ Request overlay permission first
         requestOverlayPermission();
+        startClipboardService();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        // ✅ Start clipboard service only when activity is visible
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
-            startClipboardService();
-        }
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
     }
 
-    private void handleIncomingUrl(Intent intent) {
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
-            Uri data = intent.getData();
-            String incomingUrl = data.toString();
-            Log.d("INTENT_URL", "Received external URL: " + incomingUrl);
-            if (viewModel != null) viewModel.setIncomingUrl(incomingUrl);
+    private void handleIncomingIntent(Intent intent) {
+        if (intent == null) return;
+
+        // ✅ Case 1: Coming from overlay
+        if (intent.hasExtra("copied_url")) {
+            String url = intent.getStringExtra("copied_url");
+            Log.d("MAIN_ACTIVITY", "Received from overlay: " + url);
+            viewModel.setIncomingUrl(url);
+            return;
         }
 
-        if (intent != null && intent.hasExtra("copied_url")) {
-            String copiedUrl = intent.getStringExtra("copied_url");
-            Log.d("MAIN_ACTIVITY", "Received copied URL: " + copiedUrl);
-            if (viewModel != null) viewModel.setIncomingUrl(copiedUrl);
+        // ✅ Case 2: Coming from external “Open with” (browser intent)
+        if (Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
+            String url = intent.getData().toString();
+            Log.d("MAIN_ACTIVITY", "Received via ACTION_VIEW: " + url);
+            viewModel.setIncomingUrl(url);
         }
     }
 
     private void startClipboardService() {
-        Log.d("SERVICE", "Starting ClipboardListenerService...");
-        Intent serviceIntent = new Intent(this, ClipboardListenerService.class);
-
         try {
+            Intent serviceIntent = new Intent(this, ClipboardListenerService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent);
             } else {
                 startService(serviceIntent);
             }
-            Log.d("SERVICE", "ClipboardListenerService started successfully");
+            Log.d("SERVICE", "ClipboardListenerService started");
         } catch (Exception e) {
             Log.e("SERVICE_ERROR", "Failed to start ClipboardListenerService", e);
         }
@@ -90,15 +91,11 @@ public class MainActivity extends AppCompatActivity {
     private void requestOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
-                Log.w("PERMISSION", "Overlay permission not granted, requesting...");
+                Log.w("PERMISSION", "Overlay permission not granted");
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, OVERLAY_PERMISSION_REQ);
-            } else {
-                startClipboardService();
             }
-        } else {
-            startClipboardService();
         }
     }
 
@@ -110,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("PERMISSION", "Overlay permission granted.");
                 startClipboardService();
             } else {
-                Log.w("PERMISSION", "Overlay permission denied by user.");
+                Log.w("PERMISSION", "Overlay permission denied.");
             }
         }
     }
