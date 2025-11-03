@@ -15,6 +15,10 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <queries>
         <!-- Allow your app to see browsers that can open web links -->
         <intent>
@@ -60,6 +64,29 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <service
+            android:name=".ClipboardListenerService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false"
+            tools:ignore="ForegroundServicePermission" />
+
+        <service
+            android:name=".OverlayService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:permission="android.permission.SYSTEM_ALERT_WINDOW"
+            tools:ignore="ForegroundServicePermission" />
+
+        <receiver
+            android:name=".OverlayActionReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.akshajramakrishnan.hybrid_phishing_detection.SCAN_URL" />
+            </intent-filter>
+        </receiver>
+
+
 
         <activity
             android:name=".ui.main.ScanResultActivity"
