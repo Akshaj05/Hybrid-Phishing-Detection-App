@@ -29,7 +29,7 @@ public class MainRepository {
         this.executorService = Executors.newFixedThreadPool(2);
     }
 
-    // Insert scan (async)
+    // insert scan asynchronously
     public void insertScanAsync(UrlScan scan) {
         executorService.execute(() -> urlScanDao.insertUrlScan(scan));
     }

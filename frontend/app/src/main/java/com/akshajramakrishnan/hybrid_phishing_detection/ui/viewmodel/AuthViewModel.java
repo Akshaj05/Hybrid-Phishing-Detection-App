@@ -30,6 +30,7 @@ public class AuthViewModel extends ViewModel {
         return errorLiveData;
     }
 
+    //this method is used to signup the user with email and password
     public void signup(String email, String password, Context context) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
@@ -45,6 +46,7 @@ public class AuthViewModel extends ViewModel {
                 });
     }
 
+    //this method is used to login the user with email and password
     public void login(String email, String password) {
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
@@ -61,6 +63,7 @@ public class AuthViewModel extends ViewModel {
                 });
     }
 
+    //this method is used to login the user with google account
     public void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         firebaseAuth.signInWithCredential(credential)
@@ -73,6 +76,7 @@ public class AuthViewModel extends ViewModel {
                 });
     }
 
+    //this method is used to logout the user
     public void logout() {
         firebaseAuth.signOut();
         userLiveData.postValue(null);

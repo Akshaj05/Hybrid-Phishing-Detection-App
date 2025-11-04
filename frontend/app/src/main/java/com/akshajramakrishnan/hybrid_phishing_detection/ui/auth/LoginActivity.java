@@ -67,13 +67,12 @@ public class LoginActivity extends AppCompatActivity {
         Button googleBtn = findViewById(R.id.googleBtn);
         TextView signupLink = findViewById(R.id.signupLink);
 
-        // Use ViewModelFactory
         authViewModel = new ViewModelProvider(
                 this,
                 new ViewModelFactory(getApplication())
         ).get(AuthViewModel.class);
 
-        // Email/password login
+        // email/password login
         loginBtn.setOnClickListener(v -> {
             String email = emailField.getText().toString().trim();
             String pass = passwordField.getText().toString().trim();

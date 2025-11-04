@@ -45,7 +45,7 @@ public class GradiantBarView extends View {
 
     }
 
-    /** Set the score in range 0–100 */
+    // Set the score in range 0–100
     public void setScore(int score) {
         this.scoreFraction = Math.max(0, Math.min(score, 100)) / 100f;
         invalidate(); // force redraw
@@ -58,7 +58,7 @@ public class GradiantBarView extends View {
         int w = getWidth();
         int h = getHeight();
 
-        // Gradient: Green -> Orange -> Red
+        // Gradient
         LinearGradient lg = new LinearGradient(
                 0, 0, w, 0,
                 new int[]{0xFF2E7D32, 0xFFFFA000, 0xFFC62828},
@@ -70,12 +70,12 @@ public class GradiantBarView extends View {
         canvas.drawRect(0, h * 0.25f, w, h * 0.6f, paint);
         paint.setShader(null);
 
-        // Draw pointer (black line)
+        // Draw pointer
         float px = scoreFraction * w;
         paint.setColor(pointerColor);
         canvas.drawLine(px, h * 0.1f, px, h * 0.75f, paint);
 
-        // Draw percentage text below pointer
+        // percentage text below pointer
         paint.setTextSize(35f);
         paint.setColor(textColor);
         String text = Math.round(scoreFraction * 100) + "%";

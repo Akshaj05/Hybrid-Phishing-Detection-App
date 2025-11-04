@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private void handleIncomingIntent(Intent intent) {
         if (intent == null) return;
 
-        // ✅ Case 1: Coming from overlay
+        //case 1: Coming from overlay
         if (intent.hasExtra("copied_url")) {
             String url = intent.getStringExtra("copied_url");
             Log.d("MAIN_ACTIVITY", "Received from overlay: " + url);
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // ✅ Case 2: Coming from external “Open with” (browser intent)
+        // case 2: Coming from external “Open with” (browser intent)
         if (Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
             String url = intent.getData().toString();
             Log.d("MAIN_ACTIVITY", "Received via ACTION_VIEW: " + url);

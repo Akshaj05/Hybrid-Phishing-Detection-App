@@ -13,17 +13,15 @@ public class BlockedUrl {
     private String uid;
     private long timestamp;
 
-    // ✅ Full constructor for inserting
     public BlockedUrl(String url, String uid, long timestamp) {
         this.url = url;
         this.uid = uid;
         this.timestamp = timestamp;
     }
 
-    // ✅ Empty constructor for Room
     public BlockedUrl() {}
 
-    // ✅ Getters and setters
+    //getters and setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

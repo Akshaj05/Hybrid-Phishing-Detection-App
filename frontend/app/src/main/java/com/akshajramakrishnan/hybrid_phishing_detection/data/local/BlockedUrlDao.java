@@ -18,13 +18,7 @@ public interface BlockedUrlDao {
     @Query("SELECT * FROM blocked_urls WHERE uid = :uid ORDER BY timestamp DESC")
     List<BlockedUrl> getBlockedUrls(String uid);
 
-    // ✅ For BlockedListActivity (fetch all for given user)
-    @Query("SELECT * FROM blocked_urls ORDER BY timestamp DESC")
-    List<BlockedUrl> getAllBlockedUrls();
-
     @Query("DELETE FROM blocked_urls WHERE uid = :uid")
     void clearAll(String uid);
 
-    @Delete
-    void delete(BlockedUrl blockedUrl);
 }

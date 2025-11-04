@@ -10,11 +10,9 @@ public class SafeLinkApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        // Use Application context safely
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         boolean darkMode = prefs.getBoolean("dark_mode", false);
 
-        // Apply theme using App context (Activity = null)
         ThemeUtils.applyTheme(darkMode, this);
     }
 }

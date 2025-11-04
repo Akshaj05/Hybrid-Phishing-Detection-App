@@ -36,7 +36,6 @@ public class SignupActivity extends AppCompatActivity {
         Button googleBtn = findViewById(R.id.googleBtn);
         TextView loginLink = findViewById(R.id.loginLink);
 
-        //Use ViewModelFactory for consistency with MVVM
         authViewModel = new ViewModelProvider(
                 this,
                 new ViewModelFactory(getApplication())

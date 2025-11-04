@@ -10,7 +10,7 @@ public class ThemeUtils {
     private static final String PREFS_NAME = "settings";
     private static final String KEY_DARK_MODE = "dark_mode";
 
-    // Apply theme stored in preferences (called at app startup)
+    // apply theme stored in preferences (called at app startup)
     public static void applySavedTheme(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         boolean dark = prefs.getBoolean(KEY_DARK_MODE,
@@ -20,7 +20,7 @@ public class ThemeUtils {
 
     }
 
-    // Apply theme immediately when toggle is switched
+    // apply theme immediately when toggle is switched
     public static void applyTheme(boolean darkMode, Context context) {
         if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);

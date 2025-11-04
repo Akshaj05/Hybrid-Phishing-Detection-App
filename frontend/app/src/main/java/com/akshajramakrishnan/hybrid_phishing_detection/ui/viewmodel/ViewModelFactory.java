@@ -17,17 +17,14 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        // If the ViewModel is an AndroidViewModel and has a constructor(Application)
         if (AndroidViewModelDetector.isAndroidViewModelWithAppConstructor(modelClass)) {
             try {
-                // instantiate with (Application) constructor
                 return (T) modelClass.getConstructor(Application.class).newInstance(application);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to create AndroidViewModel " + modelClass.getName(), e);
             }
         }
 
-        // Otherwise try no-arg constructor (plain ViewModel)
         try {
             return modelClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
@@ -36,9 +33,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         }
     }
 
-    /**
-     * Small helper to detect if type has constructor(Application)
-     */
+
+     //helper to detect if type has constructor
     private static class AndroidViewModelDetector {
         static boolean isAndroidViewModelWithAppConstructor(Class<?> cls) {
             try {

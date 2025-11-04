@@ -44,24 +44,23 @@ public class SettingsActivity extends Fragment {
 
         View v = inflater.inflate(R.layout.activity_settings, container, false);
 
-        // 🔹 Initialize views
+        //initialize views
         themeSwitch = v.findViewById(R.id.themeSwitch);
         autoBlockSwitch = v.findViewById(R.id.autoBlockSwitch);
         btnBlockedList = v.findViewById(R.id.btnBlockedList);
         btnLogout = v.findViewById(R.id.logoutBtn);
 
-        // 🔹 Initialize SharedPrefManager
+        // initialize SharedPrefManager
         pref = new SharedPrefManager(requireContext());
 
-        // 🔹 Prevent early listener triggering during setup
         themeSwitch.setOnCheckedChangeListener(null);
         autoBlockSwitch.setOnCheckedChangeListener(null);
 
-        // 🔹 Load saved settings
+        // load saved settings
         themeSwitch.setChecked(pref.isDarkMode());
         autoBlockSwitch.setChecked(pref.isAutoBlockEnabled());
 
-        // 🔹 Apply listeners
+        // listeners
         themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             pref.setDarkMode(isChecked);
             ThemeUtils.applyTheme(isChecked, requireActivity());
@@ -77,13 +76,13 @@ public class SettingsActivity extends Fragment {
                     Toast.LENGTH_SHORT).show();
         });
 
-        // 🔹 Blocked list
+        //blocked list
         btnBlockedList.setOnClickListener(x ->
                 startActivity(new Intent(requireContext(), BlockedListActivity.class))
         );
 
 
-        // 🔹 Logout
+        // logout
         btnLogout.setOnClickListener(x -> {
             FirebaseAuth.getInstance().signOut();
             pref.logout();

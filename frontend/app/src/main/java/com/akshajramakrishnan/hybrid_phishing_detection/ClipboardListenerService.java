@@ -31,7 +31,7 @@ public class ClipboardListenerService extends Service {
 
         createNotificationChannel();
 
-        // 💡 Delay foreground promotion on Android 14+ to avoid ForegroundServiceStartNotAllowedException
+        // delay foreground promotion
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             new Handler(Looper.getMainLooper()).postDelayed(this::tryStartForeground, 3000);
         } else {

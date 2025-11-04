@@ -66,10 +66,10 @@ public class MainViewModel extends AndroidViewModel {
                     UrlResponse res = response.body();
                     Log.d("SCAN_RESULT_DEBUG", "Response from backend → " + new com.google.gson.Gson().toJson(res));
 
-                    // Post result
+                    // post result
                     scanResult.postValue(res);
 
-                    // Save to Room
+                    // save to Room DB
                     UrlScan scan = new UrlScan(
                             pref.getUid() != null ? pref.getUid() : "guest",
                             url,
@@ -77,13 +77,11 @@ public class MainViewModel extends AndroidViewModel {
                             res.getVerdict(),
                             res.getScore(),
                             res.getMlProb(),
-                            res.getTimeMs()  // ✅ use backend’s actual timeMs
+                            res.getTimeMs()
                     );
                     new Thread(() -> database.urlScanDao().insertUrlScan(scan)).start();
                 }
             }
-
-
 
             @Override
             public void onFailure(Call<UrlResponse> call, Throwable t) {

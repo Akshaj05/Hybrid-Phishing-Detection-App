@@ -71,6 +71,7 @@ public class ScanResultActivity extends AppCompatActivity {
         reportBtn = findViewById(R.id.reportBtn);
         backBtn = findViewById(R.id.backBtn);
 
+        //This part handles both cases: loading from DB or from intent extras
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra(EXTRA_SCAN_ID)) {
@@ -106,7 +107,7 @@ public class ScanResultActivity extends AppCompatActivity {
 
             Uri uri = Uri.parse(finalUrl);
 
-            // List of browser package names (priority order)
+
             String[] browsers = new String[]{
                     "com.android.chrome",
                     "com.sec.android.app.sbrowser",
@@ -124,7 +125,7 @@ public class ScanResultActivity extends AppCompatActivity {
                     intent1.setPackage(browser);
                     intent1.addCategory(Intent.CATEGORY_BROWSABLE);
                     intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getPackageManager().getPackageInfo(browser, 0); // Check if installed
+                    getPackageManager().getPackageInfo(browser, 0); // check if installed
                     startActivity(intent1);
                     Toast.makeText(this, "Opening in " + browser, Toast.LENGTH_SHORT).show();
                     opened = true;
@@ -195,7 +196,7 @@ public class ScanResultActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
-                        // ✅ Create folder and save PDF
+                        //Create folder and save PDF
                         java.io.File reportsDir = new java.io.File(getExternalFilesDir(null), "reports");
                         if (!reportsDir.exists()) reportsDir.mkdirs();
                         String fileName = "SafeLink_Report_" + System.currentTimeMillis() + ".pdf";
@@ -214,19 +215,19 @@ public class ScanResultActivity extends AppCompatActivity {
                                 "Report saved: " + pdfFile.getAbsolutePath(),
                                 Toast.LENGTH_LONG).show();
 
-                        // ✅ Build a content URI for FileProvider
+                        //URI for fileProvider which handles file access permissions
                         Uri uri = androidx.core.content.FileProvider.getUriForFile(
                                 ScanResultActivity.this,
                                 getPackageName() + ".provider",
                                 pdfFile
                         );
 
-                        // ✅ Prepare the intent to open PDF
+                        //intent to open PDF
                         Intent openIntent = new Intent(Intent.ACTION_VIEW);
                         openIntent.setDataAndType(uri, "application/pdf");
                         openIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-                        // ✅ Auto open if viewer exists
+                        //Auto open if viewer exists
                         if (openIntent.resolveActivity(getPackageManager()) != null) {
                             startActivity(openIntent);
                         } else {

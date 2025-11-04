@@ -17,7 +17,7 @@ public class SharedPrefManager {
         prefs = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE);
     }
 
-    // 🔹 Save user session after login
+    // save user session after login
     public void saveUserSession(String uid, String email) {
         prefs.edit()
                 .putString(KEY_UID, uid)
@@ -25,7 +25,7 @@ public class SharedPrefManager {
                 .apply();
     }
 
-    // 🔹 Check if logged in (fix for your LoginActivity)
+    // check if logged in
     public boolean isLoggedIn() {
         return prefs.contains(KEY_UID) && prefs.getString(KEY_UID, "").length() > 0;
     }
@@ -54,16 +54,5 @@ public class SharedPrefManager {
 
     public boolean isAutoBlockEnabled() {
         return prefs.getBoolean(KEY_AUTO_BLOCK, false);
-    }
-
-    public void setDefaultBrowserPackage(String pkg) {
-        prefs.edit().putString(KEY_BROWSER_PKG, pkg).apply();
-    }
-
-    public String getDefaultBrowserPackage() {
-        return prefs.getString(KEY_BROWSER_PKG, "");
-    }
-    public void saveDefaultBrowserPackage(String pkg) {
-        prefs.edit().putString("default_browser_pkg", pkg).apply();
     }
 }

@@ -54,14 +54,14 @@ public class ScanHistoryActivity extends Fragment {
     }
 
     private void loadHistory() {
-        String uid = pref.getUid(); // Make sure you have SharedPrefManager initialized
+        String uid = pref.getUid();
         if (uid == null || uid.isEmpty()) {
-            uid = "guest"; // fallback, optional
+            uid = "guest";
         }
 
         String finalUid = uid;
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<UrlScan> list = db.urlScanDao().getScansForUser(finalUid); // ✅ filter by user
+            List<UrlScan> list = db.urlScanDao().getScansForUser(finalUid);
 
             requireActivity().runOnUiThread(() -> {
                 scans.clear();

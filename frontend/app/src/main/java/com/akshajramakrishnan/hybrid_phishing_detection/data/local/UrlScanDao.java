@@ -23,6 +23,4 @@ public interface UrlScanDao {
     @Delete
     void deleteScan(UrlScan scan);
 
-    @Query("DELETE FROM url_scans WHERE user_id = :uid")
-    void clearAllForUser(String uid);
 }

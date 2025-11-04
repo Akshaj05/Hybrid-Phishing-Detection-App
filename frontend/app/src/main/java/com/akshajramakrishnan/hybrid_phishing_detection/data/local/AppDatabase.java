@@ -12,7 +12,7 @@ import com.akshajramakrishnan.hybrid_phishing_detection.data.model.User;
 
 @Database(
         entities = {UrlScan.class, BlockedUrl.class, User.class},
-        version = 2, // ✅ increment version number
+        version = 2,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

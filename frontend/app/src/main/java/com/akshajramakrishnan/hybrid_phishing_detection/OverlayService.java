@@ -34,7 +34,7 @@ public class OverlayService extends Service {
         super.onCreate();
         createNotificationChannel();
 
-        // 🔔 Immediately start foreground to avoid crash
+        // Immediately start foreground to avoid crash
         startForeground(200, buildNotification());
         Log.d("OVERLAY_SERVICE", "Foreground started successfully");
     }
@@ -81,7 +81,7 @@ public class OverlayService extends Service {
                 Log.d("OVERLAY_SERVICE", "Scan button clicked: " + url);
 
                 Intent broadcastIntent = new Intent("com.akshajramakrishnan.hybrid_phishing_detection.SCAN_URL");
-                broadcastIntent.setPackage(getPackageName()); // ✅ explicitly target this app
+                broadcastIntent.setPackage(getPackageName());
                 broadcastIntent.putExtra("url", url);
 
                 sendBroadcast(broadcastIntent);
@@ -120,7 +120,6 @@ public class OverlayService extends Service {
         removeOverlay();
     }
 
-    // 🔔 Create channel + notification
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(

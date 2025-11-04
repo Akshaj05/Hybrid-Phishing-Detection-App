@@ -21,7 +21,7 @@ public class User {
         this.isLoggedIn = isLoggedIn;
     }
 
-    // Getters & setters
+    // getters & setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

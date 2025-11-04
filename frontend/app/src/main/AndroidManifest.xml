@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.akshajramakrishnan.hybrid_phishing_detection">
-    <!-- ✅ Permissions -->
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -20,7 +20,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <queries>
-        <!-- Allow your app to see browsers that can open web links -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.BROWSABLE" />
@@ -32,7 +31,6 @@
             <data android:scheme="https" />
         </intent>
 
-        <!-- allow querying by package name for common browsers -->
         <package android:name="com.android.chrome" />
         <package android:name="com.sec.android.app.sbrowser" />
         <package android:name="org.mozilla.firefox" />
@@ -91,20 +89,18 @@
         <activity
             android:name=".ui.main.ScanResultActivity"
             android:exported="false" />
-        <!-- ✅ Firebase initialization -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_launcher_foreground" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorPrimary" /> <!-- ✅ Main Launcher Activity -->
+            android:resource="@color/colorPrimary" />
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Hybrid_phishing_Detection"
             android:windowSoftInputMode="adjustResize">
 
-            <!-- ✅ Handle “Open with SafeLinkAnalyzer” for URLs -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -114,7 +110,7 @@
                 <data android:scheme="http" />
                 <data android:scheme="https" />
             </intent-filter>
-        </activity> <!-- ✅ Authentication Activities -->
+        </activity>
         <activity
             android:name=".ui.main.BlockedListActivity"
             android:exported="false" />

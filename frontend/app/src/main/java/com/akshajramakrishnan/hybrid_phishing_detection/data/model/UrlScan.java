@@ -19,8 +19,6 @@ public class UrlScan {
     private int score;
     private double mlProb;
     private long timestamp;
-
-    // ✅ Full constructor including userId
     public UrlScan(String userId, String originalUrl, String finalUrl, String verdict,
                    int score, double mlProb, long timestamp) {
         this.userId = userId;
@@ -32,10 +30,9 @@ public class UrlScan {
         this.timestamp = timestamp;
     }
 
-    // ✅ No-arg constructor for Room
     public UrlScan() {}
 
-    // Getters and setters
+    // getters and setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
