@@ -44,9 +44,6 @@ def draw_verdict_bar(c, x, y, width, height, score):
 
 
 def _create_score_chart(ml_prob, heuristic_score, final_score, path):
-    """
-    Create a clear bar chart comparing ML Probability, Heuristic Score, and Final Score.
-    """
     labels = ["ML Probability", "Heuristic Score", "Final Score"]
     values = [ml_prob * 100, heuristic_score, final_score*100]
 
@@ -67,27 +64,14 @@ def _create_score_chart(ml_prob, heuristic_score, final_score, path):
             fontsize=9,
             fontweight='bold'
         )
-
-    # Improve layout
     plt.tight_layout()
     plt.savefig(path, bbox_inches="tight")
     plt.close()
 
 
-
-
 def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf"):
-    """
-    result_data expected format:
-      {
-        "label": "phishing" or "suspicious" or "safe",
-        "score": 0.0-1.0,            # overall normalized score (0..1)
-        "ml_prob": 0.0-1.0,          # model probability
-        "heuristic_score": 0-100,    # heuristic numeric score (0..100)
-        "features": { ... }          # features dict (optional)
-      }
-    """
-    # ensure sensible defaults & normalization
+
+    # ensure defaults & normalization
     score = float(result_data.get("score"))
     ml_prob = float(result_data.get("ml_prob", 0.0))
     heuristic = float(result_data.get("heuristic_score", 0.0))
@@ -98,7 +82,7 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
     margin_left = 60
     current_y = page_h - 50
 
-    # Title (centered, bold black)
+    # Title
     c.setFont("Helvetica-Bold", 22)
     c.setFillColor(colors.HexColor("#0B0B61"))  # dark blue title color
     c.drawCentredString(page_w / 2, current_y, "Phishing URL Analysis Report")
@@ -122,7 +106,7 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
     c.drawString(margin_left, current_y, "Prediction Summary")
     current_y -= 18
 
-    # Prediction summary contents (black normal)
+    # Prediction summary contents
     c.setFont("Helvetica", 11)
     label_disp = str(result_data.get("verdict", "Unknown")).capitalize()
     c.drawString(margin_left + 20, current_y, f"Prediction Verdict:  {label_disp}")
@@ -142,14 +126,13 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
     bar_w = 380
     bar_h = 18
     draw_verdict_bar(c, bar_x, current_y - bar_h, bar_w, bar_h, score)
-    current_y -= (bar_h + 36)  # spacing after bar
+    current_y -= (bar_h + 36)
 
-    # Score comparison chart - TITLE FIRST
+    # Score comparison chart
     c.setFont("Helvetica-Bold", 13)
     c.drawString(margin_left, current_y, "Score Comparison (ML vs Heuristic):")
     current_y -= 22
 
-    # Score comparison chart (matplotlib -> temp png -> embed)
     tmp_chart = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     tmp_chart.close()
     try:
@@ -165,7 +148,7 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
 
     current_y -= (chart_h + 20)
 
-    # Key Extracted Features - bullet list, larger font for content
+    # Key Extracted Features
     features = result_data.get("features", {})
     if features:
         c.setFont("Helvetica-Bold", 13)
@@ -203,13 +186,11 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
         if "whois_country" in features:
             bullets.append(f"The domain is registered in {features['whois_country']}.")
 
-        # Draw bullets with slightly larger font and spacing
         text_x = margin_left + 20
-        c.setFont("Helvetica", 12)  # larger font for content
+        c.setFont("Helvetica", 12)
         c.setFillColor(colors.black)
         leading = 18
         for i, line in enumerate(bullets, 1):
-            # wrap lines manually if too long: use simple split by 90 chars
             max_chars = 90
             words = line.split()
             cur_line = ""
@@ -220,18 +201,16 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
                     c.drawString(text_x, current_y, f"• {cur_line}")
                     current_y -= leading
                     cur_line = w
-                # end for
             if cur_line:
                 c.drawString(text_x, current_y, f"• {cur_line}")
                 current_y -= leading
         current_y -= 6
 
-    # Final Verdict text block (bold heading, normal text)
+    # Final Verdict text block
     c.setFont("Helvetica-Bold", 13)
     c.setFillColor(colors.black)
     c.drawString(margin_left, current_y, "Final Verdict:")
     current_y -= 18
-    #Add spacing below before the paragraph
     current_y -= 12
 
     c.setFont("Helvetica", 14)
@@ -244,6 +223,7 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
     else:
         verdict_text = "This website is likely PHISHING. Avoid entering sensitive data."
         c.setFillColor(colors.red)
+    
     # Draw the verdict paragraph (wrap)
     max_chars = 100
     parts = []
@@ -264,7 +244,7 @@ def generate_pdf_report(url, result_data, output_path="url_analysis_report.pdf")
     # Footer
     c.setFont("Helvetica-Oblique", 9)
     c.setFillColor(colors.black)
-    c.drawCentredString(page_w / 2, 30, "© Hybrid Phishing Detection System by Akshaj | Confidential Report")
+    c.drawCentredString(page_w / 2, 30, "© Hybrid Phishing Detection System by Akshaj")
 
     # finalize PDF
     c.showPage()

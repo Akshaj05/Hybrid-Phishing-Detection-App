@@ -7,7 +7,6 @@ import datetime
 from urllib.parse import urlparse
 
 def calculate_entropy(text):
-    """Calculate Shannon entropy of a string"""
     if not text:
         return 0
     entropy = 0
@@ -21,7 +20,6 @@ def calculate_entropy(text):
     return entropy
 
 def get_domain_age(domain):
-    """Returns domain age in days or -1 if lookup fails"""
     try:
         w = whois.whois(domain)
         creation_date = w.creation_date
@@ -38,7 +36,6 @@ def get_domain_age(domain):
         return -1
 
 def is_domain_resolvable(domain):
-    """Check if DNS resolution works"""
     try:
         socket.gethostbyname(domain)
         return 1
@@ -51,20 +48,20 @@ def extract_features(url):
     path = parsed.path
     query = parsed.query
 
-    # Calculate entropy of the hostname
+    # entropy of the hostname
     host_entropy = calculate_entropy(domain)
 
-    # Define suspicious keywords
+    #suspicious keywords
     suspicious_keywords = [
         'login', 'secure', 'bank', 'verify', 'account', 'update', 'confirm',
         'password', 'wallet', 'alert', 'authenticate', 'verification'
     ]
     
-    # Count suspicious keywords in URL
+    # count suspicious keywords
     url_lower = url.lower()
     sus_kw_count = sum(1 for kw in suspicious_keywords if kw in url_lower)
 
-    # Lexical / structural features
+    # structural features
     features = {
         "url_len": len(url),
         "hostname_length": len(domain),
@@ -91,13 +88,12 @@ def extract_features(url):
         "host_entropy": host_entropy,
     }
 
-    # Host-based / WHOIS features
+    # WHOIS features
     features.update({
         "domain_age_days": get_domain_age(domain),
         "is_domain_resolvable": is_domain_resolvable(domain),
     })
 
-    # Normalize failed WHOIS lookups
     if features["domain_age_days"] < 0:
         features["domain_age_days"] = 0
 
